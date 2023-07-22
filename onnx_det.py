@@ -1,13 +1,8 @@
-import sys
-import time
-import math
-
 import cv2
 import onnx
 import numpy as np
 import onnxruntime
 from PIL import Image
-from preprocess import NormalizeImage, ToCHWImage, KeepKeys, DetResizeForTest
 from postprocess import DBPostProcess
 
 # 大部分代码来自PaddleOCR
