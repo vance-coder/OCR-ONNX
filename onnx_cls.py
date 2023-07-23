@@ -8,7 +8,7 @@ import os
 # onnx inference
 
 # preprocess
-def preproc(img, input_size):
+def orient_preproc(img, input_size):
     # img = img[:, :, ::-1] #BGR to RGB
     img = cv2.resize(img, input_size, interpolation=1)  # unified resize
     mean = [0.485, 0.456, 0.406]
@@ -24,7 +24,7 @@ def orient_correct(model, img):
     label_list = ['0', '90', '180', '270']
     rotate_list = [None, cv2.ROTATE_90_COUNTERCLOCKWISE, cv2.ROTATE_180, cv2.ROTATE_90_CLOCKWISE]
 
-    norm_img = preproc(img.copy(), (224, 224))  # w,h
+    norm_img = orient_preproc(img.copy(), (224, 224))  # w,h
     outputs = model.run(None, {model.get_inputs()[0].name: norm_img})
     res_idx = np.argmax(outputs[0][0])
     print('orientation:', label_list[res_idx])

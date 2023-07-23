@@ -3,6 +3,7 @@ import onnx
 import numpy as np
 import onnxruntime
 from PIL import Image
+from preprocess import *
 from postprocess import DBPostProcess
 
 # 大部分代码来自PaddleOCR
