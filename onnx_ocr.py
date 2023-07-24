@@ -2,7 +2,7 @@ from onnx_rec import *
 from onnx_det import *
 from onnx_cls import *
 
-from PIL import Image
+from postprocess import draw_ocr_box_txt
 
 # detect
 det_db_thresh = 0.3
@@ -13,7 +13,7 @@ use_dilation = True
 # DetResizeForTest 定义检测模型前处理规则
 pre_process_list = [{
     'DetResizeForTest': {
-        'resize_long': 736  # 512
+        'resize_long': 640  # 512
     }
 }, {
     'NormalizeImage': {
@@ -39,7 +39,7 @@ det_model = onnxruntime.InferenceSession(det_model_path, providers=['CPUExecutio
 
 # init rec model
 pred_process = RecPred('vocab.txt', 'ch', use_space_char=True)
-svtr_path = 'models/svtr_small.onnx'
+svtr_path = 'models/svtr_base_latest.onnx'
 svtr_rec_model = InferenceSession(svtr_path, providers=['CPUExecutionProvider'])
 # crnn_path = 'models/crnn.onnx'
 # crnn_rec_model = InferenceSession(crnn_path, providers=['CPUExecutionProvider'])
@@ -54,15 +54,20 @@ def ocr_proc(image):
     dt_boxes_part, img_part = get_boxes(image, det_model, preprocess, postprocess)
 
     data = []
-
+    txts = []
+    score = []
     for idx, box in enumerate(dt_boxes_part):
         img_crop = get_rotate_crop_image(image, box)
-        text, acc = onnx_rec_img(img_crop, svtr_rec_model, pred_process, padding=True, rec_image_shape=(3, 32, 400))
+        text, acc = onnx_rec_img(img_crop, svtr_rec_model, pred_process, padding=True, rec_image_shape=(3, 32, 480))
         # if acc <= 0.93:
         #     text1, acc1 = onnx_rec_img(img_crop, crnn_rec_model, pred_process, padding=True, rec_image_shape=None)
         #     print(text1, acc1)
         #     if acc1 > acc:
         #         text, acc = text1, acc1
+        txts.append(text)
+        score.append(acc)
         data.append([idx, text, round(float(acc), 3)])
 
-    return image, data
+    show_img = draw_ocr_box_txt(Image.fromarray(image), dt_boxes_part, txts, score)
+
+    return show_img, data

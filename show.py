@@ -26,14 +26,6 @@ model_list = ["tiny", "small", "base", "large"]
 def ocr_process(model_option, image):
     print(model_option)
     print(image.shape)
-
-    output_df = [
-        [1, 'value1', 0.98],
-        [2, 'value2', 0.94],
-        [3, 'value3', 0.97],
-        [4, 'value4', 0.99],
-    ]
-    # return image, output_df
     image, data = ocr_proc(image)
     print(image.shape, data)
     return image, data
@@ -44,6 +36,8 @@ with gr.Blocks() as demo:
     comp.Markdown("OCR application demo, DB detection model + SVTR model")
     # Radio
     model_option = comp.Radio(model_list)
+
+    btn = comp.Button("submit")
 
     input_image = comp.Image()
 
@@ -56,9 +50,8 @@ with gr.Blocks() as demo:
         datatype=["number", "str", "number"],
     )
 
-    btn = comp.Button("submit")
-
     btn.click(fn=ocr_process, inputs=[model_option, input_image], outputs=[output_image, output_df])
 
 if __name__ == "__main__":
+    # TODO accuracy average
     demo.launch()
